@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 #include "class.h"
 #include "new.h"
 #include "string.h"
@@ -12,6 +13,7 @@
 struct string_struct {
     const void * Class;
     char * text;
+    int size;
 };
 
 
@@ -23,6 +25,8 @@ static void * string_ctor(void * _self, va_list * app) {
     self->text = malloc(strlen(t) + 1);
     assert(self->text);
     strcpy(self->text, t);
+    self->size = strlen(t);
+
     return self;
 }
 
@@ -72,4 +76,29 @@ const void * String_t = & _string;
 const char * string_gettext_ro(const String * self) {
     return self->text;
 }
+
+
+
+int string_length(const String * self) {
+    return self->size;
+}
+
+
+
+int string_max_size() {
+    return INT_MAX;
+}
+
+
+
+char string_at(const String * self, int pos) {
+    return *(self->text + pos % self->size);
+}
+
+
+
+// need to modify string_ctor to make this work
+//String * string_append(const String * self, const String * b) {
+//    return new(String_t, self->text, b->text);
+//}
 
