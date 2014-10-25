@@ -97,8 +97,15 @@ char string_at(const String * self, int pos) {
 
 
 
-// need to modify string_ctor to make this work
-//String * string_append(const String * self, const String * b) {
-//    return new(String_t, self->text, b->text);
-//}
+String * string_append(const String * self, const String * b) {
+    s = new(String_t, self->text);
+
+    s->size = strlen(self->text) + strlen(b->text) + 1;
+    s->text = realloc(s->text, s->size);
+    assert(s->text);
+
+    strcpy(s->text + strlen(self->text), b->text);
+
+    return s;
+}
 
