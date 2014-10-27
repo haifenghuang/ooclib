@@ -1,6 +1,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
@@ -22,7 +23,7 @@ static void * string_ctor(void * _self, va_list * app) {
     String * self = _self;
 
     // because null terminated strings suck
-    const int s = va_arg(* app, const int);
+    const size_t s = va_arg(* app, const size_t);
     const char * t = va_arg(* app, const char *);
 
     self->text = malloc(s);
@@ -45,7 +46,7 @@ static void * string_dtor(void * _self) {
 
 static void * string_clone(const void * _self) {
     const String * self = _self;
-    return new(String_t, self->text);
+    return new(String_t, self->size, self->text);
 }
 
 
@@ -76,14 +77,13 @@ const void * String_t = & _string;
 
 
 
-// removed till figure out a way of printing strings without null termination
-//const char * string_gettext_ro(const String * self) {
-//    return self->text;
-//}
+size_t string_fwrite(const String * self, FILE * stream) {
+    return fwrite(self->text, sizeof(char), self->size, stream);
+}
 
 
 
-int string_length(const String * self) {
+size_t string_length(const String * self) {
     return self->size;
 }
 
