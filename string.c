@@ -13,19 +13,22 @@
 struct string_struct {
     const void * Class;
     char * text;
-    int size;
+    size_t size;
 };
 
 
 
 static void * string_ctor(void * _self, va_list * app) {
     String * self = _self;
+
+    // because null terminated strings suck
+    const int s = va_arg(* app, const int);
     const char * t = va_arg(* app, const char *);
 
-    self->text = malloc(strlen(t) + 1);
+    self->text = malloc(s);
     assert(self->text);
-    strcpy(self->text, t);
-    self->size = strlen(t);
+    memcpy(self->text, t, s);
+    self->size = s;
 
     return self;
 }
@@ -52,9 +55,9 @@ static int string_differ(const void * _self, const void * _b) {
 
     if (self == b)
     	return 0;
-    if (!b || b->Class != String_t)
+    if (!b || b->Class != String_t || self->size != b->size)
     	return 1;
-    return strcmp(self->text, b->text);
+    return memcmp(self->text, b->text, self->size);
 }
 
 
@@ -73,9 +76,10 @@ const void * String_t = & _string;
 
 
 
-const char * string_gettext_ro(const String * self) {
-    return self->text;
-}
+// removed till figure out a way of printing strings without null termination
+//const char * string_gettext_ro(const String * self) {
+//    return self->text;
+//}
 
 
 
@@ -98,13 +102,13 @@ char string_at(const String * self, int pos) {
 
 
 String * string_append(const String * self, const String * b) {
-    s = new(String_t, self->text);
+    s = new(String_t, self->size, self->text);
 
-    s->size = strlen(self->text) + strlen(b->text) + 1;
+    s->size = self->size + b->size;
     s->text = realloc(s->text, s->size);
     assert(s->text);
 
-    strcpy(s->text + strlen(self->text), b->text);
+    memcpy(s->text + self->size, b->text);
 
     return s;
 }
